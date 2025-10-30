@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2>Chat Room: game</h2>
+    <div
+      id="chatBox"
+      style="border: 1px solid #ccc; height: 200px; overflow: auto"
+    ></div>
+    <input id="msg" placeholder="Type message..." />
+    <button onclick="sendMsg()">Send</button>
+
+    <script>
+      const username = "harshit";
+      const room = "game";
+      const ws = new WebSocket(
+        `ws://127.0.0.1:8000/chat/ws/${room}/${username}`
+      );
+
+      ws.onopen = () => console.log("Connected to WebSocket");
+      ws.onmessage = (event) => {
+        const chatBox = document.getElementById("chatBox");
+        chatBox.innerHTML += `<p>${event.data}</p>`;
+      };
+
+      function sendMsg() {
+        const msg = document.getElementById("msg").value;
+        ws.send(msg);
+        document.getElementById("msg").value = "";
+      }
+    </script>
+  </body>
+</html>
