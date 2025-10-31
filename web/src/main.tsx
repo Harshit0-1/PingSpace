@@ -6,6 +6,11 @@ import LoginPage from './pages/LoginPage'
 import SignUpPage from './pages/SignUpPage'
 import ChatLayout from './pages/ChatLayout'
 import ProtectedRoute from './routes/ProtectedRoute'
+// Ensure theme is applied before first paint
+const savedTheme = (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) || 'light'
+if (typeof document !== 'undefined') {
+  document.documentElement.setAttribute('data-theme', savedTheme)
+}
 
 const router = createBrowserRouter([
   { path: '/', element: <LoginPage /> },

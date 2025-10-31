@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { useAuthStore } from '../store/authStore'
+import { useThemeStore } from '../store/themeStore'
 
 export default function ChatLayout() {
   const logout = useAuthStore((s) => s.logout)
+  const toggleTheme = useThemeStore((s) => s.toggleTheme)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   return (
     <div className="app-shell">
       <aside className={"sidebar" + (isSidebarOpen ? " open" : "") }>
         <div className="sidebar-header">
-          <div className="brand">Biscord</div>
+          <div className="brand">PingSpace</div>
         </div>
         <div className="tabs">
           <button className="tab active">Groups</button>
@@ -25,6 +27,7 @@ export default function ChatLayout() {
         <header className="chat-header">
           <button className="menu" aria-label="Open sidebar" onClick={() => setIsSidebarOpen(true)}>☰</button>
           <input className="search" placeholder="Search" />
+          <button className="circle" title="Toggle theme" onClick={toggleTheme}>🌓</button>
           <button className="circle" title="Profile" onClick={logout}>
             ⦿
           </button>

@@ -42,7 +42,7 @@ export default function SignUpPage() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h1 className="brand">Biscord</h1>
+        <h1 className="brand">PingSpace</h1>
         <h2>Create account</h2>
         <form onSubmit={onSubmit} className="auth-form">
           <label>
