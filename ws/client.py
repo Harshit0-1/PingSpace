@@ -11,3 +11,7 @@ async def main():
             print("📩 Message:", msg)
 
 asyncio.run(main())
+
+#ws://127.0.0.1:8000/chat/ws/game/harshit
+#ws://127.0.0.1:8000/chat/ws/gam/harshit
+#ws://127.0.0.1:8000/chat/ws/game/rahul
