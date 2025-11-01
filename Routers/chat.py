@@ -47,20 +47,21 @@ async def chatSocket(websocket: WebSocket, room: str, username: str , db:Session
 
 
     await manager.connect(websocket , room , username)
-    messages = (
-                    db.query(Message)
-                    .filter(Message.room == get_room.id)
-                    .order_by(Message.timestamp.asc())
-                    .all()
-              )
-    for message in messages :
-         await websocket.send_text(f'[old] {message.sender} :{message.content}' )
     new_member = manager.check_new(room , username)
     if new_member :
          
         await manager.broadcast(room , f'{username} joined the {room}')
     else : 
          pass
+    # messages = (
+    #                 db.query(Message)
+    #                 .filter(Message.room == get_room.id)
+    #                 .order_by(Message.timestamp.asc())
+    #                 .all()
+    #           )
+    # for message in messages :
+    #      await websocket.send_text(f'{message.sender} :{message.content}')
+    
     try:
          while True :
               data = await websocket.receive_text()
@@ -70,11 +71,11 @@ async def chatSocket(websocket: WebSocket, room: str, username: str , db:Session
               db.refresh(new_msg)
               
               message = f'{username} : {data}'
-              await manager.broadcast(room , message)
+              await manager.broadcast(room , data)
     except WebSocketDisconnect :
-         manager.disconnect(websocket  ,room)
+         manager.disconnect(websocket, username ,room)
          message = f'{username} left the chat'
-         await manager.broadcast(room , message)
+         
 
 
 
@@ -87,6 +88,7 @@ def create_room(data : RoomCreate , db:Session = Depends(get_db)):
         new_room = Room(name= data.name , description = data.description)
         db.add(new_room)
         db.commit()
+
 
 
 
@@ -104,3 +106,6 @@ def get_message(db:Session = Depends(get_db)) :
 def get_history(room: int, db:Session = Depends(get_db) ) :
      get_chats = db.query(Message).filter(Message.room == room).all()
      return get_chats
+
+
+

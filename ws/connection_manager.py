@@ -19,19 +19,19 @@ class ConnectionManager:
     
 
 
-    def disconnect(self, websocket: WebSocket, room: str):
-        if room in self.rooms:
-            # self.rooms[room].remove(websocket)
-            # if not self.rooms[room]:
-            #     del self.rooms[room]
-            pass
+    def disconnect(self, websocket : WebSocket ,  username: str, room: str):
+        self.online[room].remove(username)
+        self.rooms[room].remove(websocket)
+        print(self.online[room])
     async def broadcast(self, room: str, message: str ):
-    
-        if room in self.rooms:
+       
+            if room in self.rooms:
+                try :
 
-            for connection in self.rooms[room]:
-                await connection.send_text(message)
-
+                    for connection in self.rooms[room]:
+                        await connection.send_text(message)
+                except :
+                    self.disconnect(connection , room)
     def get_all_the_rooms(self):
         return self.rooms
     def check_new(self, room: str, username: str):

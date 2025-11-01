@@ -20,4 +20,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 }))
 
+export const getToken = () => {
+  return localStorage.getItem('token')
+}
 
