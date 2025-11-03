@@ -1,11 +1,12 @@
 import { useEffect, useState, useRef, type KeyboardEvent } from "react";
 import { useAuthStore } from "../store/authStore.js";
 import { useThemeStore } from "../store/themeStore.js";
-import { options } from "../helper/fetchOptions.js";
 import { jwtDecode } from "jwt-decode";
 import Sidebar from "../components/Sidebar.js";
 import ChatHeader from "../components/ChatHeader.js";
 import ChatScreen from "../components/ChatScreen.js";
+import { baseUrl } from "../helper/constant.js";
+import { options } from "../helper/fetchOptions.js";
 
 export default function ChatLayout() {
   const logout = useAuthStore((s) => s.logout);
@@ -28,8 +29,8 @@ export default function ChatLayout() {
     const get_data = async () => {
       try {
         const res = await fetch(
-          `http://127.0.0.1:8000/chat/histroy?room=${roomID.toString()}`,
-          options("get")
+          `${baseUrl}/chat/histroy?room=${roomID.toString()}`,
+          options("GET")
         );
         if (!res.ok) {
           const text = await res.text();
@@ -48,23 +49,21 @@ export default function ChatLayout() {
   }, [roomID]);
 
   useEffect(() => {
-    ws.current?.close();
+    if (!username) return;
 
-    ws.current = new WebSocket(
-      `ws://127.0.0.1:8000/chat/ws/${room}/${username}`
-    );
+    ws.current?.close();
+    const wsUrl = baseUrl.replace(/^http/, "ws") ; // ws:// or wss://
+    ws.current = new WebSocket(`${wsUrl}/chat/ws/${room}/${username}`);
+
     ws.current.onopen = () => console.log("WebSocket connected");
     ws.current.onmessage = (event) => {
       const new_obj = { sender: username, content: event.data };
-
       setChat((prev) => [...prev, new_obj]);
     };
     ws.current.onerror = (error) => console.error("WebSocket error:", error);
     ws.current.onclose = () => console.log("WebSocket closed");
 
-    return () => {
-      ws.current?.close();
-    };
+    return () => ws.current?.close();
   }, [room, username]);
 
   const selectedRoom = (roomName: string, id) => {
@@ -74,7 +73,7 @@ export default function ChatLayout() {
   };
   useEffect(() => {
     const getRoom = async () => {
-      const url = "http://127.0.0.1:8000/chat/get_room";
+      const url = `${baseUrl}/chat/get_room`;
       const options = {
         method: "GET",
         header: { "Content-Type": "application/json" },
@@ -102,7 +101,7 @@ export default function ChatLayout() {
     }
   };
   const handleNewRoom = async () => {
-    const url = `http://127.0.0.1:8000/chat/create_room`;
+    const url = `${baseUrl}/chat/create_room`;
 
     const data = {
       name: "study",

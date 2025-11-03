@@ -2,6 +2,7 @@ import { FormEvent, useState } from "react";
 import { Link, redirect, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import axios from "axios";
+import { baseUrl } from "../helper/constant";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -15,10 +16,14 @@ export default function LoginPage() {
     setError(null);
 
     axios
-      .post("http://127.0.0.1:8000/login", {
-        username: username,
-        password: password,
-      })
+      .post(
+        `${baseUrl}/login`,
+        {
+          username: username,
+          password: password,
+        },
+        { withCredentials: true }
+      )
       .then(function (response) {
         console.log(response.data);
         login(response.data);
