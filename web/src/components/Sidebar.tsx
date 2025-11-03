@@ -10,8 +10,18 @@ type SidebarProps = {
   headerSlot?: ReactNode;
   activeRoomName?: string;
 };
-
-export default function Sidebar({ rooms, onSelectRoom, onNewRoom, isOpen, headerSlot, activeRoomName }: SidebarProps) {
+const test = (e) => {
+  console.log(e);
+  console.log(e.currentTarget.dataset.id);
+};
+export default function Sidebar({
+  rooms,
+  onSelectRoom,
+  onNewRoom,
+  isOpen,
+  headerSlot,
+  activeRoomName,
+}: SidebarProps) {
   const [query, setQuery] = useState("");
   const filteredRooms = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -20,7 +30,7 @@ export default function Sidebar({ rooms, onSelectRoom, onNewRoom, isOpen, header
   }, [rooms, query]);
 
   return (
-    <aside className={"sidebar" + (isOpen ? " open" : "") }>
+    <aside className={"sidebar" + (isOpen ? " open" : "")}>
       <div className="sidebar-header">
         {headerSlot ?? <div className="brand">PingSpace</div>}
       </div>
@@ -40,9 +50,12 @@ export default function Sidebar({ rooms, onSelectRoom, onNewRoom, isOpen, header
         {filteredRooms.map((room) => (
           <div
             key={room.name}
-            className={"channel-item" + (room.name === activeRoomName ? " active" : "")}
-            onClick={() => onSelectRoom(room.name)}
+            className={
+              "channel-item" + (room.name === activeRoomName ? " active" : "")
+            }
+            onClick={() => onSelectRoom(room.name, room.id)}
             data-name={room.name}
+            data-id={room.id}
           >
             {room.name}
           </div>
@@ -56,5 +69,3 @@ export default function Sidebar({ rooms, onSelectRoom, onNewRoom, isOpen, header
     </aside>
   );
 }
-
-

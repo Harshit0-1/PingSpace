@@ -96,7 +96,7 @@ def get_room(db:Session = Depends(get_db)):
     get_room = db.query(Room).all()
     return get_room
 
-@router.get('/get_message')
+@router.get('/get_message/')
 def get_message(db:Session = Depends(get_db)) :
     get_all = db.query(Message).all()
     return get_all  

@@ -1,11 +1,11 @@
 import { useEffect, useState, useRef, type KeyboardEvent } from "react";
-import { useAuthStore } from "../store/authStore";
-import { useThemeStore } from "../store/themeStore";
+import { useAuthStore } from "../store/authStore.js";
+import { useThemeStore } from "../store/themeStore.js";
 import { options } from "../helper/fetchOptions.js";
 import { jwtDecode } from "jwt-decode";
-import Sidebar from "../components/Sidebar";
-import ChatHeader from "../components/ChatHeader";
-import ChatScreen from "../components/ChatScreen";
+import Sidebar from "../components/Sidebar.js";
+import ChatHeader from "../components/ChatHeader.js";
+import ChatScreen from "../components/ChatScreen.js";
 
 export default function ChatLayout() {
   const logout = useAuthStore((s) => s.logout);
@@ -15,6 +15,7 @@ export default function ChatLayout() {
   const [chat, setChat] = useState([]);
   const [message, setMessage] = useState("");
   const [allRoom, setAllRoom] = useState([]);
+  const [roomID, setRoomID] = useState(1);
   let [room, setRoom] = useState("game");
   let username;
   const token = localStorage.getItem("token");
@@ -22,13 +23,12 @@ export default function ChatLayout() {
     const jwt_token = jwtDecode(token);
     username = jwt_token.sub;
   }
-
   let ws = useRef<WebSocket | null>(null);
   useEffect(() => {
     const get_data = async () => {
       try {
         const res = await fetch(
-          "http://127.0.0.1:8000/chat/histroy?room=1",
+          `http://127.0.0.1:8000/chat/histroy?room=${roomID.toString()}`,
           options("get")
         );
         if (!res.ok) {
@@ -38,13 +38,14 @@ export default function ChatLayout() {
         }
 
         let data = await res.json();
+        console.log(data);
         setChat(data);
       } catch (error) {
         console.log(error);
       }
     };
     get_data();
-  }, []);
+  }, [roomID]);
 
   useEffect(() => {
     ws.current?.close();
@@ -66,7 +67,9 @@ export default function ChatLayout() {
     };
   }, [room, username]);
 
-  const selectedRoom = (roomName: string) => {
+  const selectedRoom = (roomName: string, id) => {
+    console.log("yoooooo", roomName, id);
+    setRoomID(id);
     setRoom(roomName);
   };
   useEffect(() => {
