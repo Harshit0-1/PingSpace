@@ -1,8 +1,11 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, type KeyboardEvent } from "react";
 import { useAuthStore } from "../store/authStore";
 import { useThemeStore } from "../store/themeStore";
 import { options } from "../helper/fetchOptions.js";
 import { jwtDecode } from "jwt-decode";
+import Sidebar from "../components/Sidebar";
+import ChatHeader from "../components/ChatHeader";
+import ChatScreen from "../components/ChatScreen";
 
 export default function ChatLayout() {
   const logout = useAuthStore((s) => s.logout);
@@ -59,13 +62,12 @@ export default function ChatLayout() {
     ws.current.onclose = () => console.log("WebSocket closed");
 
     return () => {
-      ws.current.close();
+      ws.current?.close();
     };
   }, [room, username]);
 
-  const selectedRoom = (e) => {
-    const newRoom = e.currentTarget.dataset.name;
-    setRoom(newRoom);
+  const selectedRoom = (roomName: string) => {
+    setRoom(roomName);
   };
   useEffect(() => {
     const getRoom = async () => {
@@ -82,13 +84,19 @@ export default function ChatLayout() {
   }, []);
 
   const send = () => {
-    if (ws.current.readyState === WebSocket.OPEN) {
+    if (ws.current && ws.current.readyState === WebSocket.OPEN) {
       ws.current.send(message);
     }
     setMessage("");
   };
   const handleChat = (e) => {
     setMessage(e.target.value);
+  };
+  const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (message.trim()) send();
+    }
   };
   const handleNewRoom = async () => {
     const url = `http://127.0.0.1:8000/chat/create_room`;
@@ -108,73 +116,32 @@ export default function ChatLayout() {
 
   return (
     <div className="app-shell">
-      <aside className={"sidebar" + (isSidebarOpen ? " open" : "")}>
-        <div className="sidebar-header">
-          <div className="brand">PingSpace</div>
-        </div>
-        <div className="tabs">
-          <button className="tab active">Groups</button>
-          <button className="tab">DM</button>
-        </div>
-        <div className="channel-list">
-          {allRoom.map((indi) => {
-            return (
-              <div
-                className="channel-item"
-                onClick={selectedRoom}
-                data-name={indi.name}
-              >
-                {indi.name}
-              </div>
-            );
-          })}
-
-          <div className="channel-item">general</div>
-          <div className="channel-item" onClick={handleNewRoom}>
-            New room
-          </div>
-        </div>
-      </aside>
+      <Sidebar
+        rooms={allRoom}
+        onSelectRoom={selectedRoom}
+        onNewRoom={handleNewRoom}
+        isOpen={isSidebarOpen}
+        headerSlot={<div className="brand">PingSpace</div>}
+        activeRoomName={room}
+      />
       {isSidebarOpen && (
         <div className="overlay" onClick={() => setIsSidebarOpen(false)} />
       )}
       <main className="chat">
-        <header className="chat-header">
-          <button
-            className="menu"
-            aria-label="Open sidebar"
-            onClick={() => setIsSidebarOpen(true)}
-          >
-            ☰
-          </button>
-          <input className="search" placeholder="Search" />
-          <button className="circle" title="Toggle theme" onClick={toggleTheme}>
-            🌓
-          </button>
-          <button className="circle" title="Profile" onClick={logout}>
-            ⦿
-          </button>
-        </header>
-        <section className="chat-body">
-          {chat.map((indi) => {
-            return (
-              <div
-                className={
-                  username == indi.sender ? "message right" : "message left"
-                }
-              >
-                {indi.sender}:{indi.content}
-              </div>
-            );
-          })}
-          {/* <div className="message left">Hello!</div>
-          <div className="message right">Hi, welcome 👋</div> */}
-        </section>
+        <ChatHeader
+          onOpenSidebar={() => setIsSidebarOpen(true)}
+          onToggleTheme={toggleTheme}
+          onLogout={logout}
+          userName={username as string}
+          roomName={room}
+        />
+        <ChatScreen username={username} messages={chat as any} />
         <footer className="chat-input">
           <input
             placeholder="Type a message"
             onChange={handleChat}
             value={message}
+            onKeyDown={handleInputKeyDown}
           />
           <button className="send" onClick={send}>
             Send
