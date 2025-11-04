@@ -12,6 +12,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   const onSubmit = async (e: FormEvent) => {
+    console.log();
     e.preventDefault();
     setError(null);
 

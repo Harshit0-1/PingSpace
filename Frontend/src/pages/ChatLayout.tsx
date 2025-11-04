@@ -7,18 +7,20 @@ import ChatHeader from "../components/ChatHeader.js";
 import ChatScreen from "../components/ChatScreen.js";
 import { baseUrl } from "../helper/constant.js";
 import { options } from "../helper/fetchOptions.js";
+import ServerSidebar from "../components/ServerSidebar.js";
 
 export default function ChatLayout() {
   const logout = useAuthStore((s) => s.logout);
   const toggleTheme = useThemeStore((s) => s.toggleTheme);
-  const [socket, setSocket] = useState([]);
+  // socket state not used; using ws ref instead
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [chat, setChat] = useState([]);
+  const [chat, setChat] = useState<any[]>([]);
   const [message, setMessage] = useState("");
   const [allRoom, setAllRoom] = useState([]);
   const [roomID, setRoomID] = useState(1);
+  const [server, setServer] = useState([]);
   let [room, setRoom] = useState("game");
-  let username;
+  let username: string | undefined = undefined;
   const token = localStorage.getItem("token");
   if (token) {
     const jwt_token = jwtDecode(token);
@@ -52,13 +54,13 @@ export default function ChatLayout() {
     if (!username) return;
 
     ws.current?.close();
-    const wsUrl = baseUrl.replace(/^http/, "ws") ; // ws:// or wss://
+    const wsUrl = baseUrl.replace(/^http/, "ws"); // ws:// or wss://
     ws.current = new WebSocket(`${wsUrl}/chat/ws/${room}/${username}`);
 
     ws.current.onopen = () => console.log("WebSocket connected");
     ws.current.onmessage = (event) => {
       const new_obj = { sender: username, content: event.data };
-      setChat((prev) => [...prev, new_obj]);
+      setChat((prev: any[]) => [...prev, new_obj]);
     };
     ws.current.onerror = (error) => console.error("WebSocket error:", error);
     ws.current.onclose = () => console.log("WebSocket closed");
@@ -66,11 +68,27 @@ export default function ChatLayout() {
     return () => ws.current?.close();
   }, [room, username]);
 
-  const selectedRoom = (roomName: string, id) => {
+  const selectedRoom = (roomName: string, id: any) => {
     console.log("yoooooo", roomName, id);
     setRoomID(id);
     setRoom(roomName);
+    setIsSidebarOpen(false);
   };
+
+  //////////////////get server////////////////
+
+  useEffect(() => {
+    const getServer = async () => {
+      const url = `${baseUrl}/chat/get_server`;
+      const res = await fetch(url);
+      const ans = await res.json();
+      setServer(ans);
+    };
+    getServer();
+  }, []);
+
+  ////////////////////get room////////////////////////
+
   useEffect(() => {
     const getRoom = async () => {
       const url = `${baseUrl}/chat/get_room`;
@@ -91,7 +109,7 @@ export default function ChatLayout() {
     }
     setMessage("");
   };
-  const handleChat = (e) => {
+  const handleChat = (e: any) => {
     setMessage(e.target.value);
   };
   const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -113,7 +131,7 @@ export default function ChatLayout() {
       body: JSON.stringify(data),
     };
     const res = await fetch(url, options);
-    const ans = await res.json();
+    await res.json();
   };
 
   return (
@@ -125,6 +143,7 @@ export default function ChatLayout() {
         isOpen={isSidebarOpen}
         headerSlot={<div className="brand">PingSpace</div>}
         activeRoomName={room}
+        server={server}
       />
       {isSidebarOpen && (
         <div className="overlay" onClick={() => setIsSidebarOpen(false)} />

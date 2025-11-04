@@ -9,3 +9,5 @@ class Server(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
     owner_id = Column(Integer, ForeignKey('user.id'))
+    owner = relationship('User' , back_populates = 'server')
+    room = relationship('Room' , back_populates='server')

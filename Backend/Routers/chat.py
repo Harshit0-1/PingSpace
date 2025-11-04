@@ -15,14 +15,15 @@ from models.message import Message
 from schemas.user_schema import UserOut, UserResponse
 from schemas.room_schema import RoomCreate, RoomResponse
 from ws.connection_manager import ConnectionManager
-
-
-
+from schemas.server_schema import ServerCreate , ServerResponse
+from models.server import Server
+from models.serveruser import ServerUser
+from schemas.server_user_schema import ServerUserResponse , CreateServerUser
 
 
 router = APIRouter()
 manager = ConnectionManager()
-@router.get('/')
+@router.get('/' , response_model=UserResponse )
 def get_all_user(db:Session = Depends(get_db)) :
     users = db.query(User).all()
     return users
@@ -89,6 +90,24 @@ def create_room(data : RoomCreate , db:Session = Depends(get_db)):
         return new_room
 
 
+@router.post('/create_server' , response_model=ServerResponse , tags = ['server'])
+def create_server(data:ServerCreate , db:Session = Depends(get_db)) :
+    get_server = db.query(Server).filter(Server.name == data.name).first()
+    print("............" , get_server)
+
+    if(get_server) :
+        raise HTTPException(status_code=401 , detail='Server already exists')
+    new_server = Server(name =data.name , owner_id = data.owner_id)
+    db.add(new_server)
+    db.commit()
+    db.refresh(new_server)
+    return new_server
+
+@router.get('/get_server' , response_model = list[ServerResponse] , tags = ['server'])
+def get_server(db:Session = Depends(get_db)) :
+    servers = db.query(Server).all()
+    return servers
+
 
 
 @router.get('/get_room' , response_model=list[RoomResponse] , tags=['room'])
@@ -107,4 +126,20 @@ def get_history(room: int, db:Session = Depends(get_db) ) :
      return get_chats
 
 
+# for ServerUser model 
+@router.post('/serverUser/{user_id}/{server_id}/{role}' , response_model=ServerUserResponse)
+def create_server_user(user_id , server_id ,role ,  db : Session = Depends(get_db)):
+     get_userid = db.query(ServerUser).filter(ServerUser.user_id== user_id).first()
+     if get_userid :
+          raise HTTPException(status_code= 401 , detail = "user is already in this room")
+     new_server_user = ServerUser(user_id = user_id, server_id = server_id , role = role)
+     db.add(new_server_user)
+     db.commit()
+     db.refresh(new_server_user)
+     return new_server_user
+@router.get('/serverUser/{user_id}')
+def get_users_server(user_id , db:Session = Depends(get_db)) :
+     get_server = db.query(ServerUser).filter(ServerUser.user_id == user_id).all()
+     
+     return get_server
 

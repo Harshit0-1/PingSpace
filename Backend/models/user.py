@@ -9,3 +9,4 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     username = Column(String, unique=True)
     password = Column(String)
+    server = relationship("Server" , back_populates='owner')
