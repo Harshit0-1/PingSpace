@@ -1,8 +1,8 @@
 import { FormEvent, useState } from "react";
-import { Link, redirect, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
-import axios from "axios";
 import { baseUrl } from "../helper/constant";
+import { options } from "../helper/fetchOptions";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -12,27 +12,29 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   const onSubmit = async (e: FormEvent) => {
-    console.log();
     e.preventDefault();
     setError(null);
 
-    axios
-      .post(
+    try {
+      const response = await fetch(
         `${baseUrl}/login`,
-        {
-          username: username,
-          password: password,
-        },
-        { withCredentials: true }
-      )
-      .then(function (response) {
-        console.log(response.data);
-        login(response.data);
-        navigate("/chat");
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+        options("POST", null, { username, password }, true)
+      );
+
+      if (!response.ok) {
+        const errData = await response.json();
+        setError(errData.message || "Login failed");
+        return;
+      }
+
+      const data = await response.json();
+      console.log(data);
+      login(data);
+      navigate("/chat");
+    } catch (err) {
+      console.error(err);
+      setError("An error occurred. Please try again.");
+    }
   };
 
   return (

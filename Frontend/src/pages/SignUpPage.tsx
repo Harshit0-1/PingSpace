@@ -1,7 +1,7 @@
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { baseUrl } from "../helper/constant";
+import { options } from "../helper/fetchOptions";
 
 export default function SignUpPage() {
   const [username, setUsername] = useState("");
@@ -14,23 +14,23 @@ export default function SignUpPage() {
     setError(null);
 
     try {
-      const { data } = await axios.post(`${baseUrl}/signup`, {
-        username,
-        password,
-      });
+      const response = await fetch(
+        `${baseUrl}/signup`,
+        options("POST", null, { username, password }, true)
+      );
 
-      console.log("Signup success:", data);
-
-      navigate("/");
-    } catch (err: any) {
-      console.error(err);
-
-      if (axios.isAxiosError(err)) {
-        // Axios error handling
-        setError(err.response?.data?.detail || "Failed to create account");
-      } else {
-        setError("Something went wrong. Please try again later.");
+      if (!response.ok) {
+        const errData = await response.json();
+        setError(errData.detail || "Failed to create account");
+        return;
       }
+
+      const data = await response.json();
+      console.log("Signup success:", data);
+      navigate("/");
+    } catch (err) {
+      console.error(err);
+      setError("Something went wrong. Please try again later.");
     }
   };
 
