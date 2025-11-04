@@ -8,7 +8,8 @@ origins = [
     "http://192.168.200.130:5173",
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://pingspace-jmzl.onrender.com",  
+    "https://pingspace-jmzl.onrender.com", 
+    "https://pingspace1.vercel.app" 
 ]
 
 app.add_middleware(
