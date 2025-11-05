@@ -18,12 +18,14 @@ export default function ChatLayout() {
   const [allRoom, setAllRoom] = useState([]);
   const [roomID, setRoomID] = useState(1);
   const [server, setServer] = useState([]);
+  const [sender, setSender] = useState([]);
   let [room, setRoom] = useState("game");
   let username: string | undefined = undefined;
   const token = localStorage.getItem("token");
   if (token) {
     const jwt_token = jwtDecode(token);
     username = jwt_token.sub;
+    console.log(username);
   }
   let ws = useRef<WebSocket | null>(null);
   useEffect(() => {
@@ -40,7 +42,6 @@ export default function ChatLayout() {
         }
 
         let data = await res.json();
-        console.log(data);
         setChat(data);
       } catch (error) {
         console.log(error);
@@ -48,18 +49,29 @@ export default function ChatLayout() {
     };
     get_data();
   }, [roomID]);
-
+  useEffect(() => {
+    console.log("💬 Chat updated:", chat);
+  }, [chat]);
   useEffect(() => {
     if (!username) return;
 
     ws.current?.close();
     const wsUrl = baseUrl.replace(/^http/, "ws"); // ws:// or wss://
     ws.current = new WebSocket(`${wsUrl}/chat/ws/${room}/${username}`);
+    console.log("........this is uusernam : ", username);
 
     ws.current.onopen = () => console.log("WebSocket connected");
     ws.current.onmessage = (event) => {
-      const new_obj = { sender: username, content: event.data };
-      setChat((prev: any[]) => [...prev, new_obj]);
+      console.log(event.target.url);
+      try {
+        const payload = JSON.parse(event.data);
+        const new_obj = { sender: payload.sender, content: payload.content };
+        setChat((prev: any[]) => [...prev, new_obj]);
+      } catch (e) {
+        // Fallback if server sends plain text
+        const new_obj = { sender: "", content: String(event.data) };
+        setChat((prev: any[]) => [...prev, new_obj]);
+      }
     };
     ws.current.onerror = (error) => console.error("WebSocket error:", error);
     ws.current.onclose = () => console.log("WebSocket closed");
@@ -84,6 +96,7 @@ export default function ChatLayout() {
       setServer(ans);
     };
     getServer();
+    console.log(chat);
   }, []);
 
   ////////////////////get room////////////////////////

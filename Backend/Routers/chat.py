@@ -38,6 +38,7 @@ def delete_user(id ,  db:Session = Depends(get_db)) :
              return f'There is no user with this {id}'
 @router.websocket('/ws/{room}/{username}')
 async def chatSocket(websocket: WebSocket, room: str, username: str , db:Session = Depends(get_db)):
+    
     get_room = db.query(Room).filter(Room.name == room).first()
     if not get_room :
          await websocket.close(code=4001)
@@ -46,20 +47,6 @@ async def chatSocket(websocket: WebSocket, room: str, username: str , db:Session
 
 
     await manager.connect(websocket , room , username)
-    new_member = manager.check_new(room , username)
-    if new_member :
-         
-        await manager.broadcast(room , f'{username} joined the {room}')
-    else : 
-         pass
-    # messages = (
-    #                 db.query(Message)
-    #                 .filter(Message.room == get_room.id)
-    #                 .order_by(Message.timestamp.asc())
-    #                 .all()
-    #           )
-    # for message in messages :
-    #      await websocket.send_text(f'{message.sender} :{message.content}')
     
     try:
          while True :
@@ -68,9 +55,9 @@ async def chatSocket(websocket: WebSocket, room: str, username: str , db:Session
               db.add(new_msg)
               db.commit()
               db.refresh(new_msg)
-              
-              message = f'{username} : {data}'
-              await manager.broadcast(room , data)
+             # broadcast a structured payload so clients can render correctly
+              payload = {"sender": username, "content": data}
+              await manager.broadcast(room ,websocket, payload)
     except WebSocketDisconnect :
          manager.disconnect(websocket, room)
          message = f'{username} left the chat'

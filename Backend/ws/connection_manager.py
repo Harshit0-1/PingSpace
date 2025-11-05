@@ -17,6 +17,8 @@ class ConnectionManager:
         self.socket_to_username[websocket] = username
         print(f'{username} connect to {room}' )
         print('room : ',self.online)
+        print(self.socket_to_username)
+        print(self.rooms)
         
     
     def disconnect(self, websocket: WebSocket, room: str):
@@ -27,14 +29,19 @@ class ConnectionManager:
             self.online[room].remove(username)
         if room in self.online:
             print(self.online[room])
-    async def broadcast(self, room: str, message: str ):
+    async def broadcast(self, room: str ,websocket,  message):
+            print(websocket)
        
             if room in self.rooms:
                 stale_connections = []
                 # Iterate over a copy to avoid mutation during iteration
+                print("all the members in rooms : " , list(self.rooms[room]))
+                
                 for connection in list(self.rooms[room]):
+                    print("this are the username we are sending the message : " , self.socket_to_username[connection])
                     try:
-                        await connection.send_text(message)
+                        # send structured payload (sender, content)
+                        await connection.send_json(message)
                     except Exception:
                         stale_connections.append(connection)
                 for connection in stale_connections:
