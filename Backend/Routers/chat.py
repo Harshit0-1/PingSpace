@@ -72,7 +72,7 @@ async def chatSocket(websocket: WebSocket, room: str, username: str , db:Session
               message = f'{username} : {data}'
               await manager.broadcast(room , data)
     except WebSocketDisconnect :
-         manager.disconnect(websocket, username ,room)
+         manager.disconnect(websocket, room)
          message = f'{username} left the chat'
          
 
