@@ -1,12 +1,12 @@
-import { useEffect, useState, useRef, type KeyboardEvent } from "react";
-import { useAuthStore } from "../store/authStore.js";
-import { useThemeStore } from "../store/themeStore.js";
 import { jwtDecode } from "jwt-decode";
-import Sidebar from "../components/Sidebar.js";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import ChatHeader from "../components/ChatHeader.js";
 import ChatScreen from "../components/ChatScreen.js";
+import Sidebar from "../components/Sidebar.js";
 import { baseUrl } from "../helper/constant.js";
 import { options } from "../helper/fetchOptions.js";
+import { useAuthStore } from "../store/authStore.js";
+import { useThemeStore } from "../store/themeStore.js";
 
 export default function ChatLayout() {
   const logout = useAuthStore((s) => s.logout);
@@ -18,7 +18,6 @@ export default function ChatLayout() {
   const [allRoom, setAllRoom] = useState([]);
   const [roomID, setRoomID] = useState(1);
   const [server, setServer] = useState([]);
-  const [sender, setSender] = useState([]);
   let [room, setRoom] = useState("game");
   let username: string | undefined = undefined;
   const token = localStorage.getItem("token");
@@ -62,7 +61,6 @@ export default function ChatLayout() {
 
     ws.current.onopen = () => console.log("WebSocket connected");
     ws.current.onmessage = (event) => {
-      console.log(event.target.url);
       try {
         const payload = JSON.parse(event.data);
         const new_obj = { sender: payload.sender, content: payload.content };
