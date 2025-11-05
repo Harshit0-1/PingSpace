@@ -1,5 +1,6 @@
 import { jwtDecode } from "jwt-decode";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import EmojiPicker, { EmojiClickData, Theme } from "emoji-picker-react";
 import ChatHeader from "../components/ChatHeader.js";
 import ChatScreen from "../components/ChatScreen.js";
 import Sidebar from "../components/Sidebar.js";
@@ -11,6 +12,7 @@ import { useThemeStore } from "../store/themeStore.js";
 export default function ChatLayout() {
   const logout = useAuthStore((s) => s.logout);
   const toggleTheme = useThemeStore((s) => s.toggleTheme);
+  const theme = useThemeStore((s) => s.theme);
   // socket state not used; using ws ref instead
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [chat, setChat] = useState<any[]>([]);
@@ -18,6 +20,8 @@ export default function ChatLayout() {
   const [allRoom, setAllRoom] = useState([]);
   const [roomID, setRoomID] = useState(1);
   const [server, setServer] = useState([]);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
   let [room, setRoom] = useState("game");
   let username: string | undefined = undefined;
   const token = localStorage.getItem("token");
@@ -128,6 +132,23 @@ export default function ChatLayout() {
       if (message.trim()) send();
     }
   };
+  const handleEmojiClick = (emojiData: EmojiClickData) => {
+    setMessage((prev) => prev + emojiData.emoji);
+    setShowEmojiPicker(false);
+  };
+  
+  // Close emoji picker when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target as Node)) {
+        setShowEmojiPicker(false);
+      }
+    };
+    if (showEmojiPicker) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [showEmojiPicker]);
   const handleNewRoom = async () => {
     const url = `${baseUrl}/chat/create_room`;
 
@@ -168,12 +189,30 @@ export default function ChatLayout() {
         />
         <ChatScreen username={username} messages={chat as any} />
         <footer className="chat-input">
-          <input
-            placeholder="Type a message"
-            onChange={handleChat}
-            value={message}
-            onKeyDown={handleInputKeyDown}
-          />
+          <div className="chat-input-wrapper" ref={emojiPickerRef}>
+            <button
+              className="emoji-button"
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              type="button"
+              aria-label="Toggle emoji picker"
+            >
+              😊
+            </button>
+            {showEmojiPicker && (
+              <div className="emoji-picker-container">
+                <EmojiPicker
+                  onEmojiClick={handleEmojiClick}
+                  theme={theme === "dark" ? Theme.DARK : Theme.LIGHT}
+                />
+              </div>
+            )}
+            <input
+              placeholder="Type a message"
+              onChange={handleChat}
+              value={message}
+              onKeyDown={handleInputKeyDown}
+            />
+          </div>
           <button className="send" onClick={send}>
             Send
           </button>

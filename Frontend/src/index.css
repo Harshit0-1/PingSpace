@@ -60,8 +60,13 @@ a { color: var(--accent); }
 .message-bubble { padding:10px 12px; border-radius:10px; border:1px solid var(--border); background: rgba(255,255,255,0.03); }
 .message.right .message-bubble { background: rgba(88,101,242,0.18); border-color: var(--accent); }
 .chat-input { display:flex; gap:8px; padding:12px 16px; border-top:1px solid var(--border); }
+.chat-input-wrapper { position:relative; display:flex; flex:1; gap:8px; align-items:center; }
 .chat-input input { flex:1; padding:10px 12px; border-radius:8px; border:1px solid var(--border); background:var(--panel); color:var(--text); }
-.send { background:var(--accent); color:white; border:0; padding:10px 16px; border-radius:8px; }
+.emoji-button { background:transparent; border:0; font-size:20px; cursor:pointer; padding:8px; display:flex; align-items:center; justify-content:center; border-radius:8px; transition: background-color 0.15s ease; }
+.emoji-button:hover { background:rgba(255,255,255,0.05); }
+.emoji-picker-container { position:absolute; bottom:calc(100% + 8px); left:0; z-index:100; }
+.send { background:var(--accent); color:white; border:0; padding:10px 16px; border-radius:8px; cursor:pointer; }
+.send:hover { opacity:0.9; }
 
 /* Ensure sidebar doesn't move when chat scrolls */
 .app-shell { overflow:hidden; }
@@ -125,4 +130,5 @@ a { color: var(--accent); }
   .sidebar .server-sidebar { width:56px; min-width:56px; gap:8px; padding:8px 6px; }
   .overlay { position:fixed; inset:0; background: rgba(0,0,0,.5); z-index:10; }
   .message { max-width:80%; }
+  .emoji-picker-container { left:auto; right:0; }
 }
