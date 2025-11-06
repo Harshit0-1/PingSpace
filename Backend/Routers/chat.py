@@ -27,6 +27,8 @@ manager = ConnectionManager()
 def get_all_user(db:Session = Depends(get_db)) :
     users = db.query(User).all()
     return users
+
+
 @router.delete('/{id}')
 def delete_user(id ,  db:Session = Depends(get_db)) :
         get_user = db.query(User).filter(User.id == id ).first()

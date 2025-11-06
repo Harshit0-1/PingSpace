@@ -31,6 +31,9 @@ export default function Sidebar({
     if (!q) return rooms;
     return rooms.filter((r) => r.name.toLowerCase().includes(q));
   }, [rooms, query]);
+  const createChannel = () => {
+    alert("hello");
+  };
 
   return (
     <aside className={"sidebar" + (isOpen ? " open" : "")}>
@@ -59,7 +62,10 @@ export default function Sidebar({
             {filteredRooms.map((room) => (
               <div
                 key={room.name}
-                className={"channel-item" + (room.name === activeRoomName ? " active" : "")}
+                className={
+                  "channel-item" +
+                  (room.name === activeRoomName ? " active" : "")
+                }
                 onClick={() => onSelectRoom(room.name, room.id)}
                 data-name={room.name}
                 data-id={room.id}
@@ -71,7 +77,9 @@ export default function Sidebar({
             {onNewRoom && (
               <div className="channel-item" onClick={onNewRoom}>
                 <span className="channel-hash">+</span>
-                <span className="channel-name">Create channel</span>
+                <span className="channel-name" onClick={createChannel}>
+                  Create channel
+                </span>
               </div>
             )}
           </div>
