@@ -1,12 +1,12 @@
-# models/user.py
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 from Database.db import Base
+import uuid
 
 class User(Base):
     __tablename__ = 'user'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid1()))
     username = Column(String, unique=True)
     password = Column(String)
-    server = relationship("Server" , back_populates='owner')
+    server = relationship("Server", back_populates='owner')

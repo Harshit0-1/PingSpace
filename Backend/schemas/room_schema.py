@@ -3,13 +3,13 @@ from typing import Optional
 class RoomCreate(BaseModel) :
     name :str 
     description : Optional[str]
-    server_id : int
+    server_id : str
 
 class RoomResponse(BaseModel) :
-    id : int 
+    id : str 
     name : str 
     description : Optional[str]
-    server_id : Optional[int]
+    server_id : Optional[str]
 
 
     class Config:

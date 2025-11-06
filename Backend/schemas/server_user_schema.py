@@ -1,13 +1,13 @@
 from pydantic import BaseModel
 class CreateServerUser(BaseModel):
-    server_id : int
-    user_id : int 
+    server_id : str
+    user_id : str 
     role : str
 
 
 class ServerUserResponse(BaseModel) :
-    server_id : int 
-    user_id : int 
+    server_id : str 
+    user_id : str
     role : str 
 
     class Config :

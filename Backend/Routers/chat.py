@@ -23,7 +23,7 @@ from schemas.server_user_schema import ServerUserResponse , CreateServerUser
 
 router = APIRouter()
 manager = ConnectionManager()
-@router.get('/' , response_model=UserResponse )
+@router.get('/')
 def get_all_user(db:Session = Depends(get_db)) :
     users = db.query(User).all()
     return users
@@ -88,10 +88,9 @@ def create_room(data : RoomCreate , db:Session = Depends(get_db)):
 @router.post('/create_server' , response_model=ServerResponse , tags = ['server'])
 def create_server(data:ServerCreate , db:Session = Depends(get_db)) :
     get_server = db.query(Server).filter(Server.name == data.name).first()
-    print("............" , get_server)
 
     if(get_server) :
-        raise HTTPException(status_code=401 , detail='Server already exists')
+        raise HTTPException(status_code=409 , detail='Server already exists')
     new_server = Server(name =data.name , owner_id = data.owner_id)
     db.add(new_server)
     db.commit()
@@ -123,7 +122,7 @@ def get_message(db:Session = Depends(get_db)) :
     return get_all  
 
 @router.get('/histroy')
-def get_history(room: int, db:Session = Depends(get_db) ) :
+def get_history(room: str, db:Session = Depends(get_db) ) :
      get_chats = db.query(Message).filter(Message.room == room).all()
      return get_chats
 

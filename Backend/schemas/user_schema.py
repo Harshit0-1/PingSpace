@@ -2,11 +2,12 @@ from pydantic import BaseModel
 from typing import Optional
 
 class UserOut(BaseModel):
+    
     username: str
     password: str
 
 class UserResponse(BaseModel):
-    id: int
+    id: str
     username: str
 
     class Config:

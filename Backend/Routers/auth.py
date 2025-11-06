@@ -35,7 +35,8 @@ def login(data : UserOut , db:Session = Depends(get_db)) :
         get_user = db.query(User).filter(User.username == data.username).first()
         if get_user :
             if verify_password( data.password , get_user.password) :
-                token = jwt_handler.create_access_token({'sub' : get_user.username})
+                
+                token = jwt_handler.create_access_token({'sub' : get_user.username , 'id' : get_user.id})
                 return token
             else :
                 raise HTTPException(status_code=401, detail="Invalid credentials")
